@@ -1,0 +1,32 @@
+import pandas as pd
+import numpy as np
+import statsmodels.api as sm
+
+# Membaca data dari file CSV
+data = pd.read_csv ('StressLevelDataset.csv')
+
+# Handling Missing Values
+data = data.fillna(data.mean())
+
+# Handling Infinity
+data.replace([np.inf, -np.inf], np.nan, inplace=True)
+data = data.fillna(data.max())
+
+# Memilih 20 kolom numerik sebagai variabel independen
+independent_variables = ['anxiety_level', 'self_esteem', 'mental_health_history', 'depression', 'headache', 'blood_pressure', 'sleep_quality', 'breathing_problem', 'noise_level', 'living_conditions', 'safety', 'basic_needs', 'academic_performance', 'study_load' , 'teacher_student_relationship', 'future_career_concerns', 'social_support', 'peer_pressure', 'extracurricular_activities', 'bullying']
+
+# Menambahkan konstanta untuk model regresi
+X = sm.add_constant(data[independent_variables])
+
+# Membuat model regresi
+model = sm.OLS(data['stress_level'], X)
+
+# Menyesuaikan model
+results = model.fit()
+
+# Menampilkan hasil regresi
+print(results.summary())
+
+# Mengakses nilai R-squared
+rsquared = results.rsquared
+print(f'\nNilai R-squared: {rsquared}')

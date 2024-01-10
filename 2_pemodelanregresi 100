@@ -1,0 +1,15 @@
+import pandas as pd
+import numpy as np
+
+data = pd.read_csv('StressLevelDataset.csv')
+
+# Ambil 100 data
+sample_data = data.sample(100)
+
+# Ambil variabel numerik
+X = sample_data[['anxiety_level', 'self_esteem', 'mental_health_history', 'depression', 'headache']]
+Y = sample_data['stress_level']
+
+# Hitung koefisien regresi menggunakan numpy
+coefficients = np.linalg.inv(X.T @ X) @ X.T @ Y
+print("Koefisien regresi:\n", coefficients)
