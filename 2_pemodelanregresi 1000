@@ -1,17 +1,43 @@
 import pandas as pd
+import statsmodels.api as sm
 import numpy as np
 
+# Membaca data dari file CSV
 data = pd.read_csv('StressLevelDataset.csv')
 
-# Ambil 100 data
-sample_data = data.sample(1000)
+# Handling Missing Values
+data = data.fillna(data.mean())
 
-# Ambil variabel numerik
-X = sample_data[['anxiety_level', 'self_esteem', 'mental_health_history', 'depression', 'headache', 'blood_pressure', 'sleep_quality', 'breathing_problem', 'noise_level', 'living_conditions']]
-Y = sample_data['stress_level']
+# Handling Infinity
+data.replace([np.inf, -np.inf], np.nan, inplace=True)
+data = data.fillna(data.max())
 
-# Hitung koefisien regresi menggunakan numpy
-coefficients = np.linalg.inv(X.T @ X) @ X.T @ Y
-print("Koefisien regresi:\n", coefficients)
+# Memilih 5 kolom numerik sebagai variabel independen
+independent_variables = ['anxiety_level', 'self_esteem', 'mental_health_history', 'depression', 'headache', 'blood_pressure', 'sleep_quality', 'breathing_problem', 'noise_level', 'living_conditions']
 
+# Menambahkan konstanta untuk model regresi
+X = sm.add_constant(data[independent_variables])
 
+# Membuat model regresi
+model = sm.OLS(data['stress_level'], X)
+
+# Menyesuaikan model
+results = model.fit()
+
+# Menampilkan hasil regresi
+print(results.summary())
+
+# Fungsi untuk pemodelan regresi
+def predict_regression(model, data):
+    X_pred = sm.add_constant(data[independent_variables])
+    predictions = model.predict(X_pred)
+    return predictions
+
+# Menggunakan hanya 100 baris data untuk prediksi
+data_subset = data.head(1000)
+predictions_subset = predict_regression(results, data_subset)
+data_subset['Predicted_target'] = predictions_subset
+
+# Menampilkan hasil prediksi untuk 1000 data 
+print("\nPredictions for the first 1000 data:")
+print(data_subset[['anxiety_level', 'self_esteem', 'mental_health_history', 'depression', 'headache', 'blood_pressure', 'sleep_quality', 'breathing_problem', 'noise_level', 'living_conditions']])
